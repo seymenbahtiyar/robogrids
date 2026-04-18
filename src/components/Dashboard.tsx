@@ -7,7 +7,7 @@ import { AvailabilityTimeline } from './AvailabilityTimeline';
 import { TopProcessesChart } from './TopProcessesChart';
 import { TopFaultedRobotsChart } from './TopFaultedRobotsChart';
 import { JobTable } from './JobTable';
-import { LogOut } from 'lucide-react';
+import { LogOut, SquareChartGantt } from 'lucide-react';
 import { KPICards } from './KPICards';
 import { UtilizationChart } from './UtilizationChart';
 
@@ -21,9 +21,19 @@ export function Dashboard({ data, onReset }: DashboardProps) {
     <div className="min-h-screen bg-slate-50/50 p-4 md:p-8 font-sans">
       <div className="max-w-7xl mx-auto">
         <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Robogrids <span className="text-slate-400 font-medium font-sans px-2">|</span> Execution Dashboard</h1>
-            <p className="text-sm text-slate-500 mt-1">Overview of robot performance and job statuses</p>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center justify-center w-12 h-12 bg-indigo-600 rounded-xl shadow-lg ring-4 ring-indigo-50">
+              <SquareChartGantt className="w-7 h-7 text-white" />
+            </div>
+            <div>
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Robogrids</h1>
+                <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-indigo-100 text-indigo-700 rounded-full border border-indigo-200">
+                  Dashboard
+                </span>
+              </div>
+              <p className="text-sm text-slate-500 mt-1">Overview of robot performance and job statuses</p>
+            </div>
           </div>
           <button 
             onClick={onReset}

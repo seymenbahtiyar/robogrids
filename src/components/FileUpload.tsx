@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import Papa from 'papaparse';
-import { UploadCloud, AlertCircle, Download } from 'lucide-react';
+import { UploadCloud, AlertCircle, Download, SquareChartGantt } from 'lucide-react';
 import { JobRecord } from '../types';
 import { generateDemoCsv } from '../lib/demoData';
 
@@ -125,8 +125,13 @@ export function FileUpload({ onDataLoaded }: FileUploadProps) {
   return (
     <div className="flex flex-col items-center justify-center w-full max-w-3xl mx-auto mt-12 mb-20 px-4">
       <div className="text-center mb-10">
-        <div className="inline-flex items-center justify-center p-3 bg-indigo-50 rounded-2xl mb-4">
-          <UploadCloud className="w-8 h-8 text-indigo-600" />
+        <div className="flex flex-col items-center gap-4 mb-6">
+          <div className="flex items-center justify-center w-16 h-16 bg-indigo-600 rounded-2xl shadow-xl ring-4 ring-indigo-50">
+            <SquareChartGantt className="w-9 h-9 text-white" />
+          </div>
+          <span className="px-3 py-1 text-[11px] font-bold uppercase tracking-widest bg-indigo-100 text-indigo-700 rounded-full border border-indigo-200">
+            Upload Center
+          </span>
         </div>
         <h1 className="text-4xl font-bold tracking-tight text-slate-900 mb-3">Robogrids</h1>
         <p className="text-lg text-slate-500 max-w-xl mx-auto">

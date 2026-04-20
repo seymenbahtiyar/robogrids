@@ -18,12 +18,12 @@ export function generateDemoCsv(type: 'hostIdentity' | 'hostname'): string {
   // If testing Host Identity, we want distinct identities but maybe shared hostnames.
   // If testing Hostname, we want distinct hostnames but maybe a shared generic identity.
   const identities = type === 'hostIdentity' 
-    ? ['ROBOT-FINANCE', 'ROBOT-HR', 'ROBOT-IT', 'ROBOT-OPS']
-    : ['SVC-UIPATH-PROD', 'SVC-UIPATH-PROD', 'SVC-UIPATH-PROD', 'SVC-UIPATH-PROD'];
+    ? ['Robot_User_1', 'Robot_User_2', 'Robot_User_3', 'Robot_User_4']
+    : ['Robot_User_Generic', 'Robot_User_Generic', 'Robot_User_Generic', 'Robot_User_Generic'];
     
   const hostnames = type === 'hostname'
-    ? ['PROD-RPA-01', 'PROD-RPA-02', 'PROD-RPA-03', 'PROD-RPA-04']
-    : ['VM-SHARED-01', 'VM-SHARED-01', 'VM-SHARED-02', 'VM-SHARED-02'];
+    ? ['VM_1', 'VM_2', 'VM_3', 'VM_4']
+    : ['VM_1', 'VM_1', 'VM_2', 'VM_2'];
 
   let keyCounter = 1000;
 

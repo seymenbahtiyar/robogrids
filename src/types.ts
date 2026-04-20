@@ -6,6 +6,8 @@ export interface JobRecord {
   started: Date;
   ended: Date;
   durationMs: number;
+  machine?: string;
+  user?: string;
 }
 
 export interface FilterState {
@@ -13,4 +15,6 @@ export interface FilterState {
   robot: string;
   state: string;
   search: string;
+  machine?: string;
+  user?: string;
 }

@@ -9,7 +9,7 @@ interface JobTableProps {
   data: JobRecord[];
 }
 
-type SortField = 'process' | 'robot' | 'state' | 'started' | 'ended';
+type SortField = 'process' | 'robot' | 'state' | 'started' | 'ended' | 'machine' | 'user';
 type SortOrder = 'asc' | 'desc';
 
 export function JobTable({ data }: JobTableProps) {
@@ -17,6 +17,8 @@ export function JobTable({ data }: JobTableProps) {
   const [processFilter, setProcessFilter] = useState('All');
   const [robotFilter, setRobotFilter] = useState('All');
   const [stateFilter, setStateFilter] = useState('All');
+  const [machineFilter, setMachineFilter] = useState('All');
+  const [userFilter, setUserFilter] = useState('All');
   
   const [sortField, setSortField] = useState<SortField>('started');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
@@ -24,9 +26,14 @@ export function JobTable({ data }: JobTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
 
+  const hasMachine = useMemo(() => data.some(j => j.machine !== undefined), [data]);
+  const hasUser = useMemo(() => data.some(j => j.user !== undefined), [data]);
+
   const uniqueProcesses = useMemo(() => ['All', ...Array.from(new Set(data.map(j => j.process))).sort()], [data]);
   const uniqueRobots = useMemo(() => ['All', ...Array.from(new Set(data.map(j => j.robot))).sort()], [data]);
   const uniqueStates = useMemo(() => ['All', ...Array.from(new Set(data.map(j => j.state))).sort()], [data]);
+  const uniqueMachines = useMemo(() => ['All', ...Array.from(new Set(data.map(j => j.machine).filter(Boolean) as string[])).sort()], [data]);
+  const uniqueUsers = useMemo(() => ['All', ...Array.from(new Set(data.map(j => j.user).filter(Boolean) as string[])).sort()], [data]);
 
   const filteredAndSortedData = useMemo(() => {
     let result = data;
@@ -36,12 +43,16 @@ export function JobTable({ data }: JobTableProps) {
       const lowerSearch = search.toLowerCase();
       result = result.filter(j => 
         j.process.toLowerCase().includes(lowerSearch) || 
-        j.robot.toLowerCase().includes(lowerSearch)
+        j.robot.toLowerCase().includes(lowerSearch) ||
+        (j.machine && j.machine.toLowerCase().includes(lowerSearch)) ||
+        (j.user && j.user.toLowerCase().includes(lowerSearch))
       );
     }
     if (processFilter !== 'All') result = result.filter(j => j.process === processFilter);
     if (robotFilter !== 'All') result = result.filter(j => j.robot === robotFilter);
     if (stateFilter !== 'All') result = result.filter(j => j.state === stateFilter);
+    if (hasMachine && machineFilter !== 'All') result = result.filter(j => j.machine === machineFilter);
+    if (hasUser && userFilter !== 'All') result = result.filter(j => j.user === userFilter);
 
     // Sorting
     result = [...result].sort((a, b) => {
@@ -50,6 +61,8 @@ export function JobTable({ data }: JobTableProps) {
         case 'process': comparison = a.process.localeCompare(b.process); break;
         case 'robot': comparison = a.robot.localeCompare(b.robot); break;
         case 'state': comparison = a.state.localeCompare(b.state); break;
+        case 'machine': comparison = (a.machine || '').localeCompare(b.machine || ''); break;
+        case 'user': comparison = (a.user || '').localeCompare(b.user || ''); break;
         case 'started': comparison = a.started.getTime() - b.started.getTime(); break;
         case 'ended': comparison = a.ended.getTime() - b.ended.getTime(); break;
       }
@@ -57,7 +70,7 @@ export function JobTable({ data }: JobTableProps) {
     });
 
     return result;
-  }, [data, search, processFilter, robotFilter, stateFilter, sortField, sortOrder]);
+  }, [data, search, processFilter, robotFilter, stateFilter, machineFilter, userFilter, sortField, sortOrder, hasMachine, hasUser]);
 
   const totalPages = Math.ceil(filteredAndSortedData.length / itemsPerPage);
   const paginatedData = filteredAndSortedData.slice(
@@ -100,37 +113,55 @@ export function JobTable({ data }: JobTableProps) {
       <div className="p-6 border-b border-slate-200">
         <h2 className="text-lg font-semibold text-slate-900 mb-4">Job Execution Details</h2>
         
-        <div className="flex flex-wrap gap-4 items-start">
-          <div className="relative flex-grow min-w-[280px] w-full xl:w-auto">
+        <div className="flex flex-col gap-4">
+          <div className="relative w-full">
             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
               <Search className="h-4 w-4 text-slate-400" />
             </div>
             <input
               type="text"
-              placeholder="Search processes or robots..."
+              placeholder="Search processes, robots, machines, users..."
               className="block w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-900 placeholder:text-slate-400 placeholder:font-normal focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm hover:border-slate-300 bg-white"
               value={search}
               onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
             />
           </div>
           
-          <div className="flex flex-wrap gap-3 pb-2 lg:pb-0 w-full xl:w-auto flex-1">
+          <div className="flex flex-col sm:flex-row flex-wrap gap-3 w-full">
             <Select 
-              className="min-w-[160px]"
+              className="w-full sm:w-[180px]"
               value={processFilter}
               onChange={(val) => { setProcessFilter(val); setCurrentPage(1); }}
               options={uniqueProcesses.map(p => ({ value: p, label: p === 'All' ? 'All Processes' : p }))}
             />
             
             <Select 
-              className="min-w-[150px]"
+              className="w-full sm:w-[150px]"
               value={robotFilter}
               onChange={(val) => { setRobotFilter(val); setCurrentPage(1); }}
               options={uniqueRobots.map(r => ({ value: r, label: r === 'All' ? 'All Robots' : r }))}
             />
+
+            {hasMachine && (
+              <Select 
+                className="w-full sm:w-[180px]"
+                value={machineFilter}
+                onChange={(val) => { setMachineFilter(val); setCurrentPage(1); }}
+                options={uniqueMachines.map(m => ({ value: m, label: m === 'All' ? 'All Machines' : m }))}
+              />
+            )}
+
+            {hasUser && (
+              <Select 
+                className="w-full sm:w-[180px]"
+                value={userFilter}
+                onChange={(val) => { setUserFilter(val); setCurrentPage(1); }}
+                options={uniqueUsers.map(u => ({ value: u, label: u === 'All' ? 'All Users' : u }))}
+              />
+            )}
             
             <Select 
-              className="min-w-[140px]"
+              className="w-full sm:w-[140px]"
               value={stateFilter}
               onChange={(val) => { setStateFilter(val); setCurrentPage(1); }}
               options={uniqueStates.map(s => ({ value: s, label: s === 'All' ? 'All States' : s }))}
@@ -149,6 +180,16 @@ export function JobTable({ data }: JobTableProps) {
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100" onClick={() => handleSort('robot')}>
                 <div className="flex items-center">Robot <SortIcon field="robot" /></div>
               </th>
+              {hasMachine && (
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100" onClick={() => handleSort('machine')}>
+                  <div className="flex items-center">Machine <SortIcon field="machine" /></div>
+                </th>
+              )}
+              {hasUser && (
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100" onClick={() => handleSort('user')}>
+                  <div className="flex items-center">User <SortIcon field="user" /></div>
+                </th>
+              )}
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100" onClick={() => handleSort('state')}>
                 <div className="flex items-center">State <SortIcon field="state" /></div>
               </th>
@@ -166,6 +207,12 @@ export function JobTable({ data }: JobTableProps) {
                 <tr key={job.id} className="hover:bg-slate-50 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">{job.process}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{job.robot}</td>
+                  {hasMachine && (
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{job.machine}</td>
+                  )}
+                  {hasUser && (
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{job.user}</td>
+                  )}
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{getStatusBadge(job.state)}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{format(job.started, 'yyyy-MM-dd HH:mm:ss')}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{format(job.ended, 'yyyy-MM-dd HH:mm:ss')}</td>
@@ -173,7 +220,7 @@ export function JobTable({ data }: JobTableProps) {
               ))
             ) : (
               <tr>
-                <td colSpan={5} className="px-6 py-8 text-center text-sm text-slate-500">
+                <td colSpan={hasMachine || hasUser ? 6 : 5} className="px-6 py-8 text-center text-sm text-slate-500">
                   No execution records found matching your filters.
                 </td>
               </tr>

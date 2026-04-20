@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import Papa from 'papaparse';
-import { UploadCloud, AlertCircle, Download, SquareChartGantt } from 'lucide-react';
+import { UploadCloud, AlertCircle, Download, SquareChartGantt, Play } from 'lucide-react';
 import { JobRecord } from '../types';
 import { generateDemoCsv } from '../lib/demoData';
 
@@ -13,8 +13,9 @@ export function FileUpload({ onDataLoaded }: FileUploadProps) {
   const [error, setError] = useState<string | null>(null);
   const [robotColumn, setRobotColumn] = useState<'Host Identity' | 'Hostname'>('Host Identity');
 
-  const processFiles = (files: File[]) => {
+  const processFiles = (files: File[], columnOverride?: 'Host Identity' | 'Hostname') => {
     setError(null);
+    const activeColumn = columnOverride || robotColumn;
     
     // Create a promise for each file that resolves with its parsed JobRecords
     const filePromises = files.map((file) => {
@@ -27,10 +28,21 @@ export function FileUpload({ onDataLoaded }: FileUploadProps) {
               const parsedData: JobRecord[] = results.data.map((row: any, index: number) => {
                 // Extract required columns based on the prompt
                 const process = row['Process'];
-                const robot = row[robotColumn]; // Treat selected column as Robot
+                const robot = row[activeColumn]; // Treat selected column as Robot
                 const state = row['State'];
                 const startedStr = row['Started (absolute)'];
                 const endedStr = row['Ended (absolute)'];
+                const hostnameVal = row['Hostname'];
+                const hostIdentityVal = row['Host Identity'];
+
+                let machine: string | undefined = undefined;
+                let user: string | undefined = undefined;
+
+                if (activeColumn === 'Host Identity') {
+                  machine = hostnameVal;
+                } else if (activeColumn === 'Hostname') {
+                  user = hostIdentityVal;
+                }
 
                 if (!process || !state || !startedStr || !endedStr) {
                   throw new Error(`Missing required fields in row ${index + 1} of ${file.name}`);
@@ -48,6 +60,8 @@ export function FileUpload({ onDataLoaded }: FileUploadProps) {
                   started,
                   ended,
                   durationMs,
+                  machine,
+                  user
                 };
               });
               resolve(parsedData);
@@ -120,6 +134,14 @@ export function FileUpload({ onDataLoaded }: FileUploadProps) {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handleLoadDemo = (type: 'hostIdentity' | 'hostname') => {
+    const csvContent = generateDemoCsv(type);
+    const file = new File([csvContent], `demo_data_${type}.csv`, { type: 'text/csv' });
+    const col = type === 'hostIdentity' ? 'Host Identity' : 'Hostname';
+    setRobotColumn(col);
+    processFiles([file], col);
   };
 
   return (
@@ -216,25 +238,49 @@ export function FileUpload({ onDataLoaded }: FileUploadProps) {
         </div>
         
         <div className="bg-slate-50 p-6 border-t border-slate-200">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="text-sm text-slate-600">
-              <span className="font-medium text-slate-900">Need some test data?</span> Download a sample file to try it out.
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="text-sm text-slate-600">
+                <span className="font-medium text-slate-900">Want to see it in action?</span> Run a dashboard demo instantly.
+              </div>
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => handleLoadDemo('hostIdentity')}
+                  className="flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 cursor-pointer"
+                >
+                  <Play className="w-3.5 h-3.5" />
+                  Run Host Identity Demo
+                </button>
+                <button 
+                  onClick={() => handleLoadDemo('hostname')}
+                  className="flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 cursor-pointer"
+                >
+                  <Play className="w-3.5 h-3.5" />
+                  Run Hostname Demo
+                </button>
+              </div>
             </div>
-            <div className="flex gap-3">
-              <button 
-                onClick={() => handleDownloadDemo('hostIdentity')}
-                className="flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 cursor-pointer"
-              >
-                <Download className="w-3.5 h-3.5" />
-                Host Identity Demo
-              </button>
-              <button 
-                onClick={() => handleDownloadDemo('hostname')}
-                className="flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 cursor-pointer"
-              >
-                <Download className="w-3.5 h-3.5" />
-                Hostname Demo
-              </button>
+
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-200 pt-6">
+              <div className="text-sm text-slate-600">
+                <span className="font-medium text-slate-900">Need some test data?</span> Download a sample CSV file.
+              </div>
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => handleDownloadDemo('hostIdentity')}
+                  className="flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  Host Identity CSV
+                </button>
+                <button 
+                  onClick={() => handleDownloadDemo('hostname')}
+                  className="flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  Hostname CSV
+                </button>
+              </div>
             </div>
           </div>
         </div>

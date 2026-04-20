@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { JobRecord } from '../types';
 import { Clock } from 'lucide-react';
 import { format, startOfDay, addDays, getHours, getMinutes, startOfWeek, endOfWeek, isWithinInterval } from 'date-fns';
@@ -11,32 +11,69 @@ interface AvailabilityTimelineProps {
 }
 
 export function AvailabilityTimeline({ data }: AvailabilityTimelineProps) {
+  const hasMachine = useMemo(() => data.some(j => j.machine !== undefined), [data]);
+  const hasUser = useMemo(() => data.some(j => j.user !== undefined), [data]);
+
+  const uniqueMachines = useMemo(() => ['All', ...Array.from(new Set(data.map(j => j.machine).filter(Boolean) as string[])).sort()], [data]);
+  const uniqueUsers = useMemo(() => ['All', ...Array.from(new Set(data.map(j => j.user).filter(Boolean) as string[])).sort()], [data]);
+
+  const [machineFilter, setMachineFilter] = useState<string>('All');
+  const [userFilter, setUserFilter] = useState<string>('All');
+
+  const filteredData = useMemo(() => {
+    let result = data;
+    if (hasMachine && machineFilter !== 'All') {
+      result = result.filter(j => j.machine === machineFilter);
+    }
+    if (hasUser && userFilter !== 'All') {
+      result = result.filter(j => j.user === userFilter);
+    }
+    return result;
+  }, [data, hasMachine, machineFilter, hasUser, userFilter]);
+
   const uniqueRobots = useMemo(() => {
-    const robots = new Set(data.map(j => j.robot));
+    const robots = new Set(filteredData.map(j => j.robot));
     return Array.from(robots).sort();
-  }, [data]);
+  }, [filteredData]);
 
   const uniqueWeeks = useMemo(() => {
-    const weeks = new Set(data.map(j => {
+    const weeks = new Set<string>(filteredData.map(j => {
       const start = startOfWeek(j.started, { weekStartsOn: 1 });
       return format(start, 'yyyy-MM-dd');
     }));
-    return Array.from(weeks).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
-  }, [data]);
+    return Array.from(weeks).sort((a: string, b: string) => new Date(a).getTime() - new Date(b).getTime());
+  }, [filteredData]);
 
   const [selectedRobot, setSelectedRobot] = useState<string>(uniqueRobots[0] || '');
   const [selectedWeek, setSelectedWeek] = useState<string>(uniqueWeeks[0] || '');
   
+  // Keep selections valid if filters change
+  useEffect(() => {
+    if (uniqueRobots.length > 0 && !uniqueRobots.includes(selectedRobot)) {
+      setSelectedRobot(uniqueRobots[0]);
+    } else if (uniqueRobots.length === 0) {
+      setSelectedRobot('');
+    }
+  }, [uniqueRobots, selectedRobot]);
+
+  useEffect(() => {
+    if (uniqueWeeks.length > 0 && !uniqueWeeks.includes(selectedWeek)) {
+      setSelectedWeek(uniqueWeeks[0]);
+    } else if (uniqueWeeks.length === 0) {
+      setSelectedWeek('');
+    }
+  }, [uniqueWeeks, selectedWeek]);
+
   // Tooltip state
   const [hoveredJob, setHoveredJob] = useState<{ job: JobRecord, x: number, y: number } | null>(null);
 
   const timelineData = useMemo(() => {
-    if (!selectedRobot || !selectedWeek || data.length === 0) return { days: [], jobsByDay: {} };
+    if (!selectedRobot || !selectedWeek || filteredData.length === 0) return { days: [], jobsByDay: {} };
 
     const weekStart = new Date(selectedWeek);
     const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
 
-    const robotData = data.filter(j => 
+    const robotData = filteredData.filter(j => 
       j.robot === selectedRobot && 
       isWithinInterval(j.started, { start: weekStart, end: weekEnd })
     );
@@ -60,7 +97,7 @@ export function AvailabilityTimeline({ data }: AvailabilityTimelineProps) {
     });
 
     return { days, jobsByDay };
-  }, [data, selectedRobot, selectedWeek]);
+  }, [filteredData, selectedRobot, selectedWeek]);
 
   const getStatusColor = (state: string) => {
     switch (state.toLowerCase()) {
@@ -98,13 +135,32 @@ export function AvailabilityTimeline({ data }: AvailabilityTimelineProps) {
           </div>
         </div>
         
-        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row flex-wrap gap-3 w-full sm:w-auto">
           <Select 
             className="w-full sm:w-[160px]"
             value={selectedWeek}
             onChange={setSelectedWeek}
             options={uniqueWeeks.map(w => ({ value: w, label: format(new Date(w), 'MMM dd, yyyy') }))}
           />
+
+          {hasMachine && (
+            <Select 
+              className="w-full sm:w-[160px]"
+              value={machineFilter}
+              onChange={setMachineFilter}
+              options={uniqueMachines.map(m => ({ value: m, label: m === 'All' ? 'All Machines' : m }))}
+            />
+          )}
+
+          {hasUser && (
+            <Select 
+              className="w-full sm:w-[160px]"
+              value={userFilter}
+              onChange={setUserFilter}
+              options={uniqueUsers.map(u => ({ value: u, label: u === 'All' ? 'All Users' : u }))}
+            />
+          )}
+
           <Select 
             className="w-full sm:w-[220px]"
             value={selectedRobot}

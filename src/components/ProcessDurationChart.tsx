@@ -3,12 +3,18 @@ import { JobRecord } from '../types';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Activity } from 'lucide-react';
 import { Select } from './ui/Select';
+import { MultiSelect } from './ui/MultiSelect';
 import { ChartInfoTooltip } from './ui/ChartInfoTooltip';
 import { format } from 'date-fns';
 
 interface ProcessDurationChartProps {
   data: JobRecord[];
 }
+
+const METRIC_OPTIONS = [
+  { value: 'Average', label: 'Average Duration' },
+  { value: 'Total', label: 'Total Duration' }
+];
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -45,6 +51,7 @@ export function ProcessDurationChart({ data }: ProcessDurationChartProps) {
 
   const [selectedProcess, setSelectedProcess] = useState<string>('Top 10');
   const [selectedMonth, setSelectedMonth] = useState<string>('All');
+  const [selectedMetrics, setSelectedMetrics] = useState<string[]>(['Average', 'Total']);
 
   const chartData = useMemo(() => {
     if (data.length === 0) return [];
@@ -71,16 +78,27 @@ export function ProcessDurationChart({ data }: ProcessDurationChartProps) {
 
     let result = Object.entries(processGroups).map(([process, durations]) => {
       const count = durations.length;
-      const average = durations.reduce((acc, val) => acc + val, 0) / count;
+      const total = durations.reduce((acc, val) => acc + val, 0);
+      const average = total / count;
 
       return {
         process,
-        Average: Number(average.toFixed(1))
+        Average: Number(average.toFixed(1)),
+        Total: Number(total.toFixed(1))
       };
     });
 
-    // Sort by Average descending
-    result.sort((a, b) => b.Average - a.Average);
+    // Sort appropriately
+    result.sort((a, b) => {
+      if (selectedMetrics.includes('Average') && !selectedMetrics.includes('Total')) {
+        return b.Average - a.Average;
+      }
+      if (selectedMetrics.includes('Total') && !selectedMetrics.includes('Average')) {
+        return b.Total - a.Total;
+      }
+      // If both or neither, default to sorting by Average
+      return b.Average - a.Average;
+    });
     
     if (selectedProcess === 'Top 10') {
       result = result.slice(0, 10);
@@ -88,7 +106,7 @@ export function ProcessDurationChart({ data }: ProcessDurationChartProps) {
 
     return result;
 
-  }, [data, selectedProcess, selectedMonth]);
+  }, [data, selectedProcess, selectedMonth, selectedMetrics]);
 
   return (
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 mb-6 h-full flex flex-col">
@@ -100,13 +118,20 @@ export function ProcessDurationChart({ data }: ProcessDurationChartProps) {
           <div>
             <div className="flex items-center">
               <h2 className="text-lg font-semibold text-slate-900">Process Duration</h2>
-              <ChartInfoTooltip content="Shows the average execution time (in minutes) for each process to help identify performance bottlenecks." />
+              <ChartInfoTooltip content="Shows the selected duration metrics (in minutes) for processes to help identify performance bottlenecks and overall time consumption." />
             </div>
-            <p className="text-sm text-slate-500">Average duration (minutes)</p>
+            <p className="text-sm text-slate-500">Duration metrics (minutes)</p>
           </div>
         </div>
         
-        <div className="flex flex-col sm:flex-row gap-3 w-full">
+        <div className="flex flex-col sm:flex-row flex-wrap gap-3 w-full">
+          <MultiSelect
+            className="w-full sm:w-[150px]"
+            value={selectedMetrics}
+            onChange={setSelectedMetrics}
+            options={METRIC_OPTIONS}
+            placeholder="Select metrics"
+          />
           <Select 
             className="w-full sm:w-[160px]"
             value={selectedMonth}
@@ -121,7 +146,7 @@ export function ProcessDurationChart({ data }: ProcessDurationChartProps) {
             })}
           />
           <Select 
-            className="w-full sm:w-[260px]"
+            className="w-full sm:w-[260px] flex-1"
             value={selectedProcess}
             onChange={setSelectedProcess}
             options={uniqueProcesses.map(p => ({ value: p, label: p === 'Top 10' ? 'Top 10 Processes' : p }))}
@@ -149,11 +174,19 @@ export function ProcessDurationChart({ data }: ProcessDurationChartProps) {
                 dx={-10}
               />
               <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f8fafc' }} />
-              <Bar dataKey="Average" fill="#6366f1" radius={[4, 4, 0, 0]} isAnimationActive={true} animationDuration={500} animationEasing="ease-out" />
+              {selectedMetrics.length > 0 && (
+                <Legend verticalAlign="top" height={30} wrapperStyle={{ fontSize: '12px' }} iconType="circle" />
+              )}
+              {selectedMetrics.includes('Average') && (
+                <Bar name="Average" dataKey="Average" fill="#6366f1" radius={[4, 4, 0, 0]} isAnimationActive={true} animationDuration={500} animationEasing="ease-out" />
+              )}
+              {selectedMetrics.includes('Total') && (
+                <Bar name="Total" dataKey="Total" fill="#38bdf8" radius={[4, 4, 0, 0]} isAnimationActive={true} animationDuration={500} animationEasing="ease-out" />
+              )}
             </BarChart>
           </ResponsiveContainer>
         ) : (
-          <div className="h-full flex items-center justify-center text-slate-400">No data available.</div>
+          <div className="h-full flex items-center justify-center text-slate-400">No data available or no metrics selected.</div>
         )}
       </div>
       

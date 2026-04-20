@@ -177,11 +177,11 @@ export function ProcessDurationChart({ data }: ProcessDurationChartProps) {
               {selectedMetrics.length > 0 && (
                 <Legend verticalAlign="top" height={30} wrapperStyle={{ fontSize: '12px' }} iconType="circle" />
               )}
-              {selectedMetrics.includes('Average') && (
-                <Bar name="Average" dataKey="Average" fill="#6366f1" radius={[4, 4, 0, 0]} isAnimationActive={true} animationDuration={500} animationEasing="ease-out" />
-              )}
               {selectedMetrics.includes('Total') && (
-                <Bar name="Total" dataKey="Total" fill="#38bdf8" radius={[4, 4, 0, 0]} isAnimationActive={true} animationDuration={500} animationEasing="ease-out" />
+                <Bar name="Total" dataKey="Total" fill="#6366f1" radius={[4, 4, 0, 0]} isAnimationActive={true} animationDuration={500} animationEasing="ease-out" />
+              )}
+              {selectedMetrics.includes('Average') && (
+                <Bar name="Average" dataKey="Average" fill="#38bdf8" radius={[4, 4, 0, 0]} isAnimationActive={true} animationDuration={500} animationEasing="ease-out" />
               )}
             </BarChart>
           </ResponsiveContainer>

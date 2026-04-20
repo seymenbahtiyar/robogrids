@@ -260,10 +260,6 @@ export function AvailabilityTimeline({ data }: AvailabilityTimelineProps) {
           <div className="w-3 h-3 rounded-full bg-amber-500" />
           <span className="text-xs text-slate-600">Stopped</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-slate-400" />
-          <span className="text-xs text-slate-600">Other</span>
-        </div>
       </div>
 
       {/* Custom Tooltip */}

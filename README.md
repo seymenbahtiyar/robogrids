@@ -27,26 +27,28 @@
 
 **Robogrids** is a client-side analytics application designed specifically for RPA administrators, Center of Excellence (CoE) leads, and automation engineers. By processing raw execution logs (via CSV upload), it instantly transforms millions of data points into a high-level, interactive visual dashboard. 
 
-Whether you are tracking top-performing bot workloads, diagnosing faulted processes, or mapping exact robot availability via Gantt-style timelines, Robogrids gives you immediate transparency into your digital workforce.
+Whether you are tracking top-performing bot workloads, diagnosing faulted processes, or mapping exact robot availability via Gantt-style timelines, Robogrids gives you immediate transparency into your digital workforce. **Zero server uploads. 100% private.**
 
 ## ✨ Core Features
 
 ### 📊 Deep Visual Analytics
-- **Executive KPI Tracking**: Instantly view Total Success Rate, Active Robot count, Overall Utilization (Hours), and Critical Fault numbers.
+- **Executive KPI Tracking**: Instantly view Total Success Rate, Active Robot count, Overall Utilization (Hours), and Critical Fault numbers via smooth animated counters.
 - **Process Analytics**: Multi-metric charts (Average vs. Total duration) to spot performance bottlenecks in your automations.
 - **Robot Availability Timeline**: A horizontal Gantt-style timeline charting precisely when each robot was active, successful, or faulted throughout the day/week.
-- **Completion Timelines & Utilization**: Analyze system load distribution to balance server and license scaling.
+- **Completion Timelines & Utilization**: Analyze system load distribution to balance server and license scaling using interactive Line and Pie charts.
 - **Fault Tracking**: Dedicated visualizations for the "Top 10 Faulted Robots" to help prioritize maintenance efforts.
 
-### ⚙️ Dynamic File Processing
-- **Instant CSV Parsing**: Drop your standard RPA execution logs directly into the browser. The data is processed entirely client-side using `PapaParse`, meaning zero data leaves your local machine.
+### ⚙️ Dynamic & Secure File Processing
+- **100% Client-Side Parsing**: Drop your standard RPA execution logs directly into the browser. The data is processed entirely locally using `PapaParse`. 
+- **Multi-File Consolidation**: Export execution sheets from multiple different Orchestrator folders and upload them all simultaneously. Robogrids aggregates them into a single, seamless dataset.
+- **Mobile Compatibility**: Broad MIME-type configurations enable native interaction from iOS and Android filesystems.
 - **Smart Host Mapping**: The system automatically detects data configurations and dynamically adapts to "Host Identity" (Machine-specific deployments) vs. "Hostname" (User-specific virtual desktop deployments).
-- **Interactive Demo Mode**: Click "Try Demo" on launch to instantly explore a pre-populated dataset without needing a log file.
 
-### 🔍 Advanced Data Grid
-- Features a powerful bottom-level **Job Execution Table**.
-- Sort, scan, and filter raw log outputs by Process Name, Robot Name, Execution State, or Free-text Search.
-- **Cascading Filters**: Dynamically generated hardware filters (`Machine` and `User` arrays) instantly update to match your specific log topology.
+### 🛠 Extended Tools & Ecosystem
+- **Export to Image**: Instantly snapshot your fully-rendered dashboard to a high-resolution PNG using the built-in *Screenshot* capability.
+- **In-App Documentation**: An integrated reference guide explaining the mathematics and data aggregation formulas governing every single chart and timeline.
+- **Privacy & FAQ Routing**: Seamless React-state routing to dedicated Privacy Policies, Terms, and FAQ pages without losing your active dataset.
+- **Interactive Demo Mode**: Click "Run Demo" on launch to instantly explore a pre-populated dataset without needing your own log file.
 
 ---
 
@@ -61,6 +63,7 @@ Robogrids was constructed with modern front-end standards:
 - **Charts**: [Recharts](https://recharts.org/)
 - **Animations**: [Motion (Framer Motion)](https://motion.dev/)
 - **Icons**: [Lucide React](https://lucide.dev/)
+- **Exporting**: [html-to-image](https://github.com/bubkoo/html-to-image)
 - **Data Parsing**: [PapaParse](https://www.papaparse.com/)
 
 ---
@@ -71,7 +74,7 @@ Robogrids was constructed with modern front-end standards:
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/your-username/robogrids.git
+   git clone https://github.com/seymenbahtiyar/robogrids.git
    cd robogrids
    ```
 
@@ -90,14 +93,13 @@ Robogrids was constructed with modern front-end standards:
 
 ## 🌐 GitHub Pages Deployment
 
-The application is pre-configured with `gh-pages` for seamless one-click hosting.
+The application is configured to be deployed easily using `gh-pages` for seamless hosting.
 
-1. Verify the `base` property in `vite.config.ts` matches your repository name (e.g., `base: '/robogrids/'`).
-2. Run the deployment script:
+1. Run the deployment script:
    ```bash
    npm run deploy
    ```
-3. Your compiled static application will automatically build to the `/dist` directory and push to your `gh-pages` branch. The live site will be accessible at: `https://[github-username].github.io/robogrids/`.
+2. Your compiled static application will automatically build to the `/dist` directory and push to your `gh-pages` branch. 
 
 ---
 
@@ -107,22 +109,26 @@ The application is pre-configured with `gh-pages` for seamless one-click hosting
 📁 robogrids
 ├── 📁 src
 │   ├── 📁 components
-│   │   ├── 📁 ui                 # Base interactive primitives (Select, MultiSelect, etc.)
-│   │   ├── Dashboard.tsx         # Main layout wrapper
-│   │   ├── FileUpload.tsx        # Drag & drop log ingestion
-│   │   ├── KPICards.tsx          # Top-level metric calculations
-│   │   ├── ProcessDurationChart.tsx
-│   │   ├── AvailabilityTimeline.tsx
-│   │   ├── utilization and fault charts...
-│   │   └── JobTable.tsx          # The extensive data grid 
+│   │   ├── 📁 ui                 # Base interactive primitives (Dialog, Select, etc.)
+│   │   ├── Dashboard.tsx         # Main interactive interface wrapper
+│   │   ├── FileUpload.tsx        # Drag & drop multi-file log ingestion & animated UI
+│   │   ├── Documentation.tsx     # In-app formula calculations & guides
+│   │   ├── StaticPages.tsx       # FAQ, Privacy Policy, Terms & Conditions
+│   │   ├── Footer.tsx            # Global application footer navigation
+│   │   ├── KPICards.tsx          # Top-level metric animated calculations
+│   │   ├── AvailabilityTimeline.tsx # Gantt-style execution block timeline
+│   │   ├── (Various Charts)...   # Discrete Recharts modules (Utilization, Timelines)
+│   │   └── JobTable.tsx          # The extensive sortable data grid 
 │   ├── 📁 lib
-│   │   └── utils.ts              # Tailwind merge & clsx helpers
-│   ├── App.tsx                   # State router (Upload -> Load -> Dashboard)
+│   │   ├── utils.ts              # Tailwind merge & clsx helpers
+│   │   └── demoData.ts           # Mock dataset generators
+│   ├── App.tsx                   # Unified state router (Upload -> Load -> Dashboard/Pages)
 │   ├── main.tsx                  # React DOM entry
-│   └── types.ts                  # Shared TS Interfaces (JobRecord, FilterState)
-├── vite.config.ts                # Vite & deployment config
+│   └── types.ts                  # Shared TS Interfaces (JobRecord, Dashboard Props)
+├── vite.config.ts                # Vite config
 └── package.json                  # Dependencies & scripts
 ```
 
 ## 📄 License
-This project is open-source. Feel free to fork, customize, and integrate it into your internal CoE reporting workflows.
+
+This project is open-source. Feel free to fork, customize, and integrate it into your internal RPA tracking workflows.

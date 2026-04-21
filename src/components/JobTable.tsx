@@ -87,6 +87,21 @@ export function JobTable({ data }: JobTableProps) {
     }
   };
 
+  const formatDuration = (ms: number) => {
+    if (ms < 0) return '0s';
+    const totalSeconds = Math.floor(ms / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    const parts = [];
+    if (hours > 0) parts.push(`${hours}h`);
+    if (minutes > 0) parts.push(`${minutes}m`);
+    if (seconds > 0 || parts.length === 0) parts.push(`${seconds}s`);
+
+    return parts.join(' ');
+  };
+
   const getStatusBadge = (state: string) => {
     switch (state.toLowerCase()) {
       case 'successful':
@@ -199,6 +214,9 @@ export function JobTable({ data }: JobTableProps) {
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100" onClick={() => handleSort('ended')}>
                 <div className="flex items-center">Ended <SortIcon field="ended" /></div>
               </th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-default">
+                <div className="flex items-center">Duration</div>
+              </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-slate-200">
@@ -216,11 +234,12 @@ export function JobTable({ data }: JobTableProps) {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{getStatusBadge(job.state)}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{format(job.started, 'yyyy-MM-dd HH:mm:ss')}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{format(job.ended, 'yyyy-MM-dd HH:mm:ss')}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-600">{formatDuration(job.durationMs)}</td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={hasMachine || hasUser ? 6 : 5} className="px-6 py-8 text-center text-sm text-slate-500">
+                <td colSpan={hasMachine || hasUser ? 7 : 6} className="px-6 py-8 text-center text-sm text-slate-500">
                   No execution records found matching your filters.
                 </td>
               </tr>

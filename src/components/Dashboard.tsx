@@ -7,7 +7,7 @@ import { AvailabilityTimeline } from './AvailabilityTimeline';
 import { TopProcessesChart } from './TopProcessesChart';
 import { TopFaultedRobotsChart } from './TopFaultedRobotsChart';
 import { JobTable } from './JobTable';
-import { LogOut, SquareChartGantt, Camera } from 'lucide-react';
+import { LogOut, SquareChartGantt, Camera, BookOpen } from 'lucide-react';
 import { KPICards } from './KPICards';
 import { UtilizationChart } from './UtilizationChart';
 import * as htmlToImage from 'html-to-image';
@@ -15,9 +15,10 @@ import * as htmlToImage from 'html-to-image';
 interface DashboardProps {
   data: JobRecord[];
   onReset: () => void;
+  onShowDocs: () => void;
 }
 
-export function Dashboard({ data, onReset }: DashboardProps) {
+export function Dashboard({ data, onReset, onShowDocs }: DashboardProps) {
   const dashboardRef = useRef<HTMLDivElement>(null);
   const [isCapturing, setIsCapturing] = useState(false);
 
@@ -61,21 +62,28 @@ export function Dashboard({ data, onReset }: DashboardProps) {
               <p className="text-sm text-slate-500 mt-1">Overview of robot performance and job statuses</p>
             </div>
           </div>
-          <div className="flex w-full sm:w-auto items-center gap-3">
+          <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-3">
+            <button 
+              onClick={onShowDocs}
+              className="flex w-full sm:w-auto items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm cursor-pointer"
+            >
+              <BookOpen className="w-4 h-4 shrink-0" />
+              <span className="whitespace-nowrap">Docs</span>
+            </button>
             <button 
               onClick={handleDownloadScreenshot}
               disabled={isCapturing}
-              className="flex w-full sm:w-auto items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-lg hover:bg-indigo-700 transition-colors shadow-sm cursor-pointer whitespace-nowrap shrink-0 disabled:opacity-75 disabled:cursor-not-allowed"
+              className="flex w-full sm:w-auto items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-lg hover:bg-indigo-700 transition-colors shadow-sm cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
             >
-              <Camera className="w-4 h-4" />
-              {isCapturing ? 'Capturing...' : 'Screenshot'}
+              <Camera className="w-4 h-4 shrink-0" />
+              <span className="whitespace-nowrap">{isCapturing ? 'Capturing...' : 'Screenshot'}</span>
             </button>
             <button 
               onClick={onReset}
-              className="flex w-full sm:w-auto items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm cursor-pointer whitespace-nowrap shrink-0"
+              className="flex w-full sm:w-auto items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm cursor-pointer"
             >
-              <LogOut className="w-4 h-4" />
-              Load New Data
+              <LogOut className="w-4 h-4 shrink-0" />
+              <span className="whitespace-nowrap">Load New Data</span>
             </button>
           </div>
         </header>

@@ -154,18 +154,23 @@ export function ProcessDurationChart({ data }: ProcessDurationChartProps) {
         </div>
       </div>
 
-      <div className="h-[300px] w-full mt-2">
+      <div className="h-[360px] w-full mt-2">
         {chartData.length > 0 ? (
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }} barSize={12}>
+            <BarChart data={chartData} margin={{ top: 10, right: 10, left: 30, bottom: 0 }} barSize={12}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
               <XAxis 
                 dataKey="process" 
                 axisLine={false} 
                 tickLine={false} 
-                tick={{ fill: '#64748b', fontSize: 12 }}
-                dy={10}
-                tickFormatter={(val) => val.length > 15 ? val.substring(0, 15) + '...' : val}
+                tick={{ fill: '#64748b', fontSize: 11 }}
+                interval={0}
+                angle={-45}
+                textAnchor="end"
+                dx={-2}
+                dy={8}
+                height={110}
+                tickFormatter={(val) => val.length > 20 ? val.substring(0, 18) + '...' : val}
               />
               <YAxis 
                 axisLine={false} 

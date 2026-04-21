@@ -37,6 +37,23 @@ const CustomTooltip = ({ active, payload }: any) => {
   return null;
 };
 
+const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }: any) => {
+  const RADIAN = Math.PI / 180;
+  // Position text nicely inside the slice
+  const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+  // Hide label if the slice is too small to avoid overlap
+  if (percent < 0.05) return null;
+
+  return (
+    <text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central" fontSize={11} fontWeight="bold">
+      {`${(percent * 100).toFixed(0)}%`}
+    </text>
+  );
+};
+
 export function TopFaultedRobotsChart({ data }: TopFaultedRobotsChartProps) {
   const chartData = useMemo(() => {
     const faultedData = data.filter(j => j.state.toLowerCase() === 'faulted');
@@ -84,6 +101,8 @@ export function TopFaultedRobotsChart({ data }: TopFaultedRobotsChartProps) {
                 isAnimationActive={true}
                 animationDuration={500}
                 animationEasing="ease-out"
+                labelLine={false}
+                label={renderCustomizedLabel}
               >
                 {chartData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

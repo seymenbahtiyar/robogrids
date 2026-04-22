@@ -6,6 +6,7 @@ import { CompletedJobsTimeline } from './CompletedJobsTimeline';
 import { AvailabilityTimeline } from './AvailabilityTimeline';
 import { TopProcessesChart } from './TopProcessesChart';
 import { TopFaultedRobotsChart } from './TopFaultedRobotsChart';
+import { RobotDurationAreaChart } from './RobotDurationAreaChart';
 import { JobTable } from './JobTable';
 import { LogOut, SquareChartGantt, Camera, BookOpen } from 'lucide-react';
 import { KPICards } from './KPICards';
@@ -22,6 +23,7 @@ export function Dashboard({ data, onReset, onShowDocs }: DashboardProps) {
   const dashboardRef = useRef<HTMLDivElement>(null);
   const [isCapturing, setIsCapturing] = useState(false);
 
+  // ... (screenshot and return wrappers)
   const handleDownloadScreenshot = async () => {
     if (!dashboardRef.current) return;
     try {
@@ -101,6 +103,7 @@ export function Dashboard({ data, onReset, onShowDocs }: DashboardProps) {
         </div>
 
         <div className="flex flex-col gap-6 mb-6">
+          <RobotDurationAreaChart data={data} />
           <UtilizationChart data={data} />
           <CompletedJobsTimeline data={data} />
           <AvailabilityTimeline data={data} />

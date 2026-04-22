@@ -38,7 +38,13 @@ export function CompletedJobsTimeline({ data }: CompletedJobsTimelineProps) {
     return Array.from(months).sort();
   }, [data]);
 
+  const uniqueProcesses = useMemo(() => {
+    const processes = new Set(data.map(j => j.process));
+    return ['All Processes', ...Array.from(processes).sort()];
+  }, [data]);
+
   const [selectedMonth, setSelectedMonth] = useState<string>(uniqueMonths[0] || format(new Date(), 'yyyy-MM'));
+  const [selectedProcess, setSelectedProcess] = useState<string>('All Processes');
 
   // Ensure default state falls back perfectly when dataset switches
   React.useEffect(() => {
@@ -66,7 +72,12 @@ export function CompletedJobsTimeline({ data }: CompletedJobsTimelineProps) {
 
     data.forEach(job => {
       const jobMonth = format(job.ended, 'yyyy-MM');
-      if (jobMonth === selectedMonth) {
+      const processName = job.process;
+      
+      const isMonthMatch = jobMonth === selectedMonth;
+      const isProcessMatch = selectedProcess === 'All Processes' || processName === selectedProcess;
+
+      if (isMonthMatch && isProcessMatch) {
         const dayKey = format(job.ended, 'yyyy-MM-dd');
         if (dailyCounts[dayKey]) {
           const state = job.state.toLowerCase();
@@ -85,7 +96,7 @@ export function CompletedJobsTimeline({ data }: CompletedJobsTimelineProps) {
         ...dailyCounts[dateStr]
       };
     });
-  }, [data, selectedMonth]);
+  }, [data, selectedMonth, selectedProcess]);
 
   const monthLabel = useMemo(() => {
     if (!selectedMonth) return '';
@@ -96,31 +107,42 @@ export function CompletedJobsTimeline({ data }: CompletedJobsTimelineProps) {
   return (
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 mb-6 h-full flex flex-col">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+        <div className="flex items-center gap-3 w-full sm:w-auto overflow-hidden">
+          <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg shrink-0">
             <TrendingUp className="w-5 h-5" />
           </div>
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center">
-              <h2 className="text-lg font-semibold text-slate-900">Completed Jobs Timeline</h2>
+              <h2 className="text-lg font-semibold text-slate-900 truncate">Completed Jobs Timeline</h2>
               <ChartInfoTooltip content="Displays the daily volume of jobs over a month, categorized by outcome to track operational stability over time." />
             </div>
-            <p className="text-sm text-slate-500">Daily execution volume by final state</p>
+            <p className="text-sm text-slate-500 truncate">Daily execution volume by final state</p>
           </div>
         </div>
         
-        <Select 
-          className="w-full sm:w-[220px]"
-          value={selectedMonth}
-          onChange={setSelectedMonth}
-          options={uniqueMonths.map(m => {
-            const [y, mo] = m.split('-');
-            return {
-              value: m,
-              label: format(new Date(Number(y), Number(mo) - 1), 'MMMM yyyy')
-            };
-          })}
-        />
+        <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+          <Select 
+            className="w-full sm:w-[200px]"
+            value={selectedProcess}
+            onChange={setSelectedProcess}
+            options={uniqueProcesses.map(p => ({
+              value: p,
+              label: p
+            }))}
+          />
+          <Select 
+            className="w-full sm:w-[180px]"
+            value={selectedMonth}
+            onChange={setSelectedMonth}
+            options={uniqueMonths.map(m => {
+              const [y, mo] = m.split('-');
+              return {
+                value: m,
+                label: format(new Date(Number(y), Number(mo) - 1), 'MMMM yyyy')
+              };
+            })}
+          />
+        </div>
       </div>
 
       <div className="h-[300px] w-full mt-2">

@@ -71,45 +71,48 @@ export function Documentation({ onBack }: DocumentationProps) {
             </div>
           </section>
 
-          {/* Process Duration Chart */}
+          {/* Duration & Utilization */}
           <section className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
             <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
               <Activity className="w-6 h-6 text-indigo-600" />
-              <h2 className="text-2xl font-bold text-slate-900">Process Duration</h2>
+              <h2 className="text-2xl font-bold text-slate-900">Duration & Utilization Metrics</h2>
             </div>
-            <p className="text-slate-600 mb-4">
-              Evaluates execution times per unique process, filtered globally or independently by robot. Identifies performance bottlenecks by comparing Average and Total durations:
-            </p>
-            <ul className="list-disc list-inside space-y-4 text-slate-600 ml-2">
-              <li>
-                <strong className="text-slate-800">Average Duration:</strong> The mean minutes it takes Process X to complete.
-                <div className="mt-2 bg-slate-50 p-3 rounded-lg border border-slate-200 font-mono text-sm text-slate-700 block ml-6">
-                  Avg = ∑(Durations for Process X) / Count(Process X)
-                </div>
-              </li>
-              <li>
-                <strong className="text-slate-800">Total Duration:</strong> Total minutes of processing power consumed by Process X globally.
-                <div className="mt-2 bg-slate-50 p-3 rounded-lg border border-slate-200 font-mono text-sm text-slate-700 block ml-6">
-                  Total = ∑(Durations for Process X)
-                </div>
-              </li>
-            </ul>
-          </section>
-
-          {/* Utilization Charts */}
-          <section className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
-            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
-              <BarChart3 className="w-6 h-6 text-indigo-600" />
-              <h2 className="text-2xl font-bold text-slate-900">Robot Utilization Metrics</h2>
-            </div>
-            <p className="text-slate-600 mb-6">
-              Tracks actual workload capacity by analyzing absolute uptime against a 24-hour physical maximum boundary.
-            </p>
             
-            <div className="space-y-6">
+            <div className="space-y-8">
               <div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-2">Total Utilization Pie Chart</h3>
-                <p className="text-sm text-slate-600 mb-2">Compares total active operation boundaries vs. unutilized potential across the entire lifespan of the dataset.</p>
+                <h3 className="text-lg font-semibold text-slate-800 mb-2">Process Duration</h3>
+                <p className="text-sm text-slate-600 mb-4">
+                  Evaluates execution times per unique process, filtered globally or independently by robot. Identifies performance bottlenecks by comparing Average and Total durations:
+                </p>
+                <ul className="list-disc list-inside space-y-4 text-slate-600 ml-2">
+                  <li>
+                    <strong className="text-slate-800">Average Duration:</strong> The mean minutes it takes Process X to complete.
+                    <div className="mt-2 bg-slate-50 p-3 rounded-lg border border-slate-200 font-mono text-sm text-slate-700 block ml-6">
+                      Avg = ∑(Durations for Process X) / Count(Process X)
+                    </div>
+                  </li>
+                  <li>
+                    <strong className="text-slate-800">Total Duration:</strong> Total minutes of processing power consumed by Process X globally.
+                    <div className="mt-2 bg-slate-50 p-3 rounded-lg border border-slate-200 font-mono text-sm text-slate-700 block ml-6">
+                      Total = ∑(Durations for Process X)
+                    </div>
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-slate-800 mb-2">Total Duration by Robot</h3>
+                <p className="text-sm text-slate-600 mb-4">
+                  An area chart visualizing the exact total hour consumption of every documented robot on the system, giving an immediate top-down view of overall load distribution.
+                </p>
+                <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 font-mono text-sm text-slate-700">
+                  Total Hours = ∑(Duration ms for Robot X) / (1000 * 60 * 60)
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-slate-800 mb-2">Total Utilization</h3>
+                <p className="text-sm text-slate-600 mb-2">A pie chart comparing total active operation boundaries vs. unutilized potential across the entire lifespan of the dataset.</p>
                 <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 font-mono text-sm text-slate-700 space-y-1">
                   <p className="text-slate-500">// 1. Determine Lifespan</p>
                   <p>Days Span = (Maximum Global End Date - Minimum Global Start Date) + 1</p>
@@ -121,8 +124,8 @@ export function Documentation({ onBack }: DocumentationProps) {
               </div>
               
               <div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-2">Daily Utilization Bar Chart</h3>
-                <p className="text-sm text-slate-600 mb-2">Maps a robot's active utilization day over day across a selected month. Useful for viewing physical capacity caps per 24 hours.</p>
+                <h3 className="text-lg font-semibold text-slate-800 mb-2">Daily Utilization</h3>
+                <p className="text-sm text-slate-600 mb-2">A bar chart mapping a robot's active utilization day over day across a selected month. Useful for viewing physical capacity caps per 24 hours.</p>
                 <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 font-mono text-sm text-slate-700">
                   <p>Daily Active Time = ∑(Duration of jobs recorded on Day D)</p>
                   <p>Daily Utilization % = (Daily Active Time / 24 hours) × 100</p>

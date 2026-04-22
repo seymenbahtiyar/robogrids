@@ -1,5 +1,5 @@
 {
-  "name": "Robogrids",
+  "name": "robogrids",
   "description": "A browser-based dashboard to visualize and summarize UiPath Jobs execution data from CSV files.",
   "requestFramePermissions": [],
   "majorCapabilities": []

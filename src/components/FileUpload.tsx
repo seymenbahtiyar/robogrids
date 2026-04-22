@@ -4,7 +4,7 @@ import { UploadCloud, AlertCircle, Download, SquareChartGantt, Play, Info, FileD
 import { motion } from 'motion/react';
 import { JobRecord } from '../types';
 import { generateDemoCsv } from '../lib/demoData';
-import howtoImage from '../images/howto.png';
+import { howtoImageBase64 as howtoImage } from '../images/howto';
 import { Dialog } from './ui/Dialog';
 
 interface FileUploadProps {
